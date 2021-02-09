@@ -75,8 +75,6 @@ inline int fast_rand(void) {
 
 void render_fps(uint32_t fps) {
     std::string text = std::to_string(fps) + "FPS";
-//    pico_display.set_pen(100, 100, 100);
-//    pico_display.text(text, pimoroni::Point(12, 12), 0);
     pico_display.set_pen(255, 255, 255);
     pico_display.text(text, pimoroni::Point(10, 10), 0);
 }
@@ -118,62 +116,35 @@ void update_and_render(uint32_t time) {
     pico_display.update();
 }
 
-//void update(uint32_t time) {
-//    if (time - last_time < FPS) {
-//        return;
-//    }
-//    last_time = time;
-//
-//    for (uint32_t src_y = pimoroni::PicoDisplay::HEIGHT; src_y > 1; src_y--) {
-//        uint32_t src_row = src_y * pimoroni::PicoDisplay::WIDTH;
-//
-//        for (uint32_t src_x = 0; src_x < pimoroni::PicoDisplay::WIDTH; src_x++) {
-//            int rand = std::rand() % 3;
-//            uint32_t src_index = src_row - src_x;
-//            uint8_t color = fire[src_index];
-//            if (color > 0) {
-//                color = color - (rand & 1);
-//            }
-//
-//            uint32_t dst_x = src_x;
-//
-//            // Avoid propagating fire to the wrong place, when on the edges
-//            if (dst_x == 0) {
-//                dst_x = dst_x + std::max(rand - 1, 0);
-//            } else if (dst_x == pimoroni::PicoDisplay::WIDTH - 1) {
-//                dst_x = dst_x + std::min(rand - 1, 0);
-//            } else {
-//                dst_x = dst_x + rand - 1;
-//            }
-//
-//            uint32_t dst_index = src_row - pimoroni::PicoDisplay::WIDTH - dst_x;
-//            fire[dst_index] = color;
-//        }
-//    }
-//}
-//
-//void render(uint32_t time) {
-//    for (uint32_t x = 0; x < pimoroni::PicoDisplay::WIDTH; x++) {
-//        for (uint32_t y = 0; y < pimoroni::PicoDisplay::HEIGHT; y++) {
-//            uint32_t pos = posAt(x, y);
-//            pico_display.set_pen(pallete[fire[pos]]);
-//            pico_display.pixel(pimoroni::Point(x, y));
-//        }
-//    }
-//    pico_display.update();
-//}
+bool y_pressed = false;
+bool b_pressed = false;
+bool a_pressed = false;
+bool enabled = true;
 
 int main() {
     init();
     uint32_t start_time = time_us_32();
     while (true) {
 
-        if (pico_display.is_pressed(pimoroni::PicoDisplay::Y)) {
+        if (!y_pressed && pico_display.is_pressed(pimoroni::PicoDisplay::Y)) {
             wind++;
         }
-        if (pico_display.is_pressed(pimoroni::PicoDisplay::B)) {
+        y_pressed = pico_display.is_pressed(pimoroni::PicoDisplay::Y);
+
+        if (!b_pressed && pico_display.is_pressed(pimoroni::PicoDisplay::B)) {
             wind--;
         }
+        b_pressed = pico_display.is_pressed(pimoroni::PicoDisplay::B);
+
+        if (!a_pressed && pico_display.is_pressed(pimoroni::PicoDisplay::A)) {
+            uint8_t color_index = enabled ? 0 : 35;
+            for (int i = 0; i < pimoroni::PicoDisplay::WIDTH; i++) {
+                uint32_t pos = posAt(i, pimoroni::PicoDisplay::HEIGHT - 1);
+                fire[pos] = color_index;
+            }
+            enabled = !enabled;
+        }
+        a_pressed = pico_display.is_pressed(pimoroni::PicoDisplay::A);
         update_and_render((time_us_32() - start_time) / 1000);
     }
 }
