@@ -32,6 +32,7 @@ uint16_t pallete[36] = { // 36 colours
 };
 
 int8_t wind = 0;
+bool show_fps = false;
 
 int posAt(int x, int y) {
     return y * pimoroni::PicoDisplay::WIDTH + x;
@@ -112,10 +113,13 @@ void update_and_render(uint32_t time) {
         }
     }
     frames++;
-    render_fps(frames * 1000 / time);
+    if (show_fps) {
+        render_fps(frames * 1000 / time);
+    }
     pico_display.update();
 }
 
+bool x_pressed = false;
 bool y_pressed = false;
 bool b_pressed = false;
 bool a_pressed = false;
@@ -123,7 +127,7 @@ bool enabled = true;
 
 int main() {
     init();
-    uint32_t start_time = time_us_32();
+    uint64_t start_time = time_us_64();
     while (true) {
 
         if (!y_pressed && pico_display.is_pressed(pimoroni::PicoDisplay::Y)) {
@@ -145,6 +149,11 @@ int main() {
             enabled = !enabled;
         }
         a_pressed = pico_display.is_pressed(pimoroni::PicoDisplay::A);
-        update_and_render((time_us_32() - start_time) / 1000);
+
+        if (!x_pressed && pico_display.is_pressed(pimoroni::PicoDisplay::X)) {
+            show_fps = !show_fps;
+        }
+        x_pressed = pico_display.is_pressed(pimoroni::PicoDisplay::X);
+        update_and_render((time_us_64() - start_time) / 1000);
     }
 }
