@@ -1,5 +1,7 @@
 # pico-fire
 
+Implementation for the DOOM Fire, as documented by Fabien Sanglard.
+
 ![Doom Fire running on a Pi Pico][photo]
 
-[photo]: DSC_0006.jpg
+[photo]: screenshot.jpg
